@@ -1,0 +1,49 @@
+const axios = require('axios');
+const util = require('util');
+
+const getTweets = (req, res) => {
+
+  console.log(`received request ${util.inspect(req.userInfo)}`);
+
+  const handle = req.userInfo.id;
+  const baseUrl = `https://api.twitter.com/2/users/${handle}/tweets`;
+  console.log(`received user id ${handle}`);
+
+  if (!process.env.BEARER_TOKEN) {
+    res.status(400).send("Error while authenticating call");
+  }
+
+  const token = process.env.BEARER_TOKEN;
+
+  console.log(`sending request of tweets by id ${handle}`);
+
+  const requestConfig = {
+    url: baseUrl,
+    auth: {
+      bearer: token,
+    }
+  };
+
+  console.log(`sending request ${requestConfig.url}`);
+
+  const instance = axios.create({
+    baseURL: requestConfig.url,
+    timeout: 1000,
+    headers: { 'Authorization': 'Bearer ' + process.env.BEARER_TOKEN }
+  });
+
+  instance.get(requestConfig.url)
+    .then(function (response) {
+      console.log(response.data);
+
+      res.send(response.data);
+    })
+    .catch(function (error) {
+      console.log(error);
+      res.send(error);
+    });
+};
+
+module.exports = {
+  getTweets
+}

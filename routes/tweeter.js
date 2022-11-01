@@ -1,32 +1,54 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const app = express();
 const router = express.Router();
+const  { 
+  getTweets
+} = require('../controller/tweets')
 
-/* GET users listing. */
+const  { 
+  getUserInfo
+} = require('../controller/userInfo')
+
+
+/*
 router.get('/', function(req, res, next) {
-  console.log(`selected handle is ${JSON.stringify(req.query.handle)}`);
-  res.send('Query param: ' + req.query.handle);
+  const handle = req.query.handle;
+  console.log(`------> selected handle is ${JSON.stringify(handle)}`);
+  getUserInfo(req, res);
+  //getTweets(req, res);
+  //res.render('tweeter',{handle : handle})
+  //res.send('Query param: ' + req.query.handle);
 });
-
-function getTweets(handle){
-  const baseUrl = 'https://api.twitter.com/2/users/:id/tweets';
+*/
 
 
-  express.get(baseUrl, async (req, res) => {
-    if (!BEARER_TOKEN) {
+router.get('/', getUserInfo, getTweets);
+
+
+function localTweets(handle){
+  const baseUrl = `https://api.twitter.com/2/users/${handle}/tweets`;
+
+  console.log(`getting tweets by handle ${handle}`);
+
+  app.get('/', async (req, res) => {
+    if (!process.env.BEARER_TOKEN) {
       res.status(400).send(authMessage);
     }
   
     const token = BEARER_TOKEN;
+
+    console.log(`sending request tweets by handle ${handle}`);
+
     const requestConfig = {
-      url: rulesURL,
+      url: baseUrl,
       auth: {
         bearer: token,
-      },
-      json: req.body,
+      }
     };
   
     try {
+      console.log(`sending request tweets by handle ${requestConfig}`);
+
       const response = await post(requestConfig);
   
       if (response.statusCode === 200 || response.statusCode === 201) {

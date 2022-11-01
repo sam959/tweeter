@@ -1,0 +1,50 @@
+const axios = require('axios')
+
+
+const getUserInfo = (req, res, next) => {
+    const username = req.query.handle;
+    const baseUrl = `https://api.twitter.com/2/users/by/username/${username}`;
+    console.log(`getting info by username ${username}`);
+
+    if (!process.env.BEARER_TOKEN) {
+        res.status(400).send("Error while authenticating call");
+    }
+
+    const token = process.env.BEARER_TOKEN;
+
+    console.log(`sending request to get info of ${username}`);
+
+    const requestConfig = {
+        url: baseUrl,
+        auth: {
+            bearer: token,
+        }
+    };
+
+
+    console.log(`sending request to get user info: ${requestConfig.url}`);
+
+    const instance = axios.create({
+        baseURL: requestConfig.url,
+        timeout: 1000,
+        headers: { 'Authorization': 'Bearer ' + requestConfig.auth.bearer }
+    });
+
+    instance.get(requestConfig.url)
+        .then(function (response) {
+            console.log(response.data);
+
+            //res.send(response);
+            req.userInfo = response.data.data
+            next()
+
+        })
+        .catch(function (error) {
+            console.log(error);
+            res.send(JSON.stringify(error));
+        });
+};
+
+module.exports = {
+    getUserInfo
+}
