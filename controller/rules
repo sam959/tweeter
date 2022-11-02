@@ -2,17 +2,26 @@ const axios = require('axios')
 const util = require('util')
 const baseUrl = `https://api.twitter.com/2/tweets/search/stream/rules`;
 
+const setRulesToBeDeleted = (username, rules) => {
+
+    console.log(`There already are ${rules.length} rules set:`);
+    Array.from(rules).forEach(e => console.log('\t' + e.value));
+    const vals = Array.from(rules).map(e => e.value);
+
+    if (vals.find(element => element.includes(username))) {
+        return []
+    }
+    return rules.map(r => { r.id });
+};
+
 const setRules = (req, res, next) => {
     const username = req.query.handle;
     console.log(`setting rules to get tweets of user ${username}`);
-
-    if (!process.env.BEARER_TOKEN) {
-        res.status(400).send("Error while authenticating call");
-    }
-
     const token = process.env.BEARER_TOKEN;
 
-    console.log(`sending request to set rules`);
+    if (!token) {
+        res.status(400).send("Error while authenticating call");
+    }
 
     const requestConfig = {
         url: baseUrl,
@@ -60,6 +69,8 @@ const setRules = (req, res, next) => {
 };
 
 const getRules = (req, res, next) => {
+    const username = req.query.handle;
+
     if (!process.env.BEARER_TOKEN) {
         res.status(400).send("Error while authenticating call");
     }
@@ -77,15 +88,9 @@ const getRules = (req, res, next) => {
             'Authorization': 'Bearer ' + requestConfig.auth.bearer
         }
     });
-    console.log('Getting set rules...');
-
     instance.get(requestConfig.url)
         .then(function (response) {
-            const rules = response.data.data;
-            console.log(`There already are ${rules.length} rules set.`);
-            Array.from(rules).forEach(e => console.log('Active rules: ' + JSON.stringify(e)));
-
-            req.rules = rules;
+            req.toBeDeleted = setRulesToBeDeleted(username, response.data.data)
             next()
         })
         .catch(function (error) {
@@ -95,52 +100,56 @@ const getRules = (req, res, next) => {
 }
 
 const deleteRules = (req, res, next) => {
-    const username = req.query.handle;
-    const baseUrl = `https://api.twitter.com/2/tweets/search/stream/rules`;
-    console.log(`setting rules to get tweets of user ${username}`);
 
-    if (!process.env.BEARER_TOKEN) {
-        res.status(400).send("Error while authenticating call");
-    }
+    const rules = req.toBeDeleted;
 
-    const token = process.env.BEARER_TOKEN;
-
-    console.log(`sending request to set rules`);
-
-    const requestConfig = {
-        url: baseUrl,
-        auth: {
-            bearer: token,
-        },
-        data: {
-            add: [
-                { value: `from:${username}` }
-            ]
+    if (rules && rules.length > 0) {
+        const baseUrl = `https://api.twitter.com/2/tweets/search/stream/rules`;
+        console.log(`deleting ${rules.length} rules`);
+        const token = process.env.BEARER_TOKEN;
+        if (!token) {
+            res.status(400).send("Error while authenticating call");
         }
-    };
 
+        console.log(`sending request to set rules`);
 
-    console.log(`sending request to set rulses`);
+        const requestConfig = {
+            url: baseUrl,
+            auth: {
+                bearer: token,
+            },
+            data: {
+                delete: {
+                    ids: rules,
+                },
+            }
+        };
 
-    const instance = axios.create({
-        baseURL: requestConfig.url,
-        headers: {
-            'Authorization': 'Bearer ' + requestConfig.auth.bearer
-        }
-    });
+        console.log(`sending request to delete rulses`);
 
-    instance.post(requestConfig.url, requestConfig.data)
-        .then(function (response) {
-            console.log(response.data);
-            next()
-        })
-        .catch(function (error) {
-            console.log(error);
-            res.send(JSON.stringify(error));
+        const instance = axios.create({
+            baseURL: requestConfig.url,
+            headers: {
+                'Authorization': 'Bearer ' + requestConfig.auth.bearer
+            }
         });
+
+        instance.post(requestConfig.url, requestConfig.data)
+            .then(function (response) {
+                console.log(response.data);
+                next()
+            })
+            .catch(function (error) {
+                console.log(error);
+                res.send(JSON.stringify(error));
+            });
+    }
+    console.log(`no rules to delete`);
+    next()
 };
 
 module.exports = {
     setRules,
-    getRules
+    getRules,
+    deleteRules
 }

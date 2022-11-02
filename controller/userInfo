@@ -12,8 +12,6 @@ const getUserInfo = (req, res, next) => {
 
     const token = process.env.BEARER_TOKEN;
 
-    console.log(`sending request to get info of ${username}`);
-
     const requestConfig = {
         url: baseUrl,
         auth: {
@@ -29,9 +27,8 @@ const getUserInfo = (req, res, next) => {
 
     instance.get(requestConfig.url)
         .then(function (response) {
-            console.log('sending to next response: ' + JSON.stringify(response.data));
-
-            //res.send(response);
+            console.log('found user: ' + JSON.stringify(response.data));
+    
             req.userInfo = response.data.data
             next()
         })

@@ -2,21 +2,20 @@ const axios = require('axios');
 const util = require('util');
 var localTweets = require('./static/myTweets.json');
 
-const getTweets = async (req, res) => {
+const getTweets = async (req, res, next) => {
 
   console.log(`received request ${util.inspect(req.userInfo)}`);
 
   const handle = req.userInfo.id;
   const baseUrl = `https://api.twitter.com/2/users/${handle}/tweets`;
   console.log(`received user id ${handle}`);
+  const token = process.env.BEARER_TOKEN;
 
-  if (!process.env.BEARER_TOKEN) {
+  if (!token) {
     res.status(400).send("Error while authenticating call");
   }
 
-  const token = process.env.BEARER_TOKEN;
-
-  console.log(`sending request of tweets by id ${handle}`);
+  console.log(`getting tweets by id ${handle}`);
 
   const requestConfig = {
     url: baseUrl,
@@ -25,20 +24,21 @@ const getTweets = async (req, res) => {
     }
   };
 
-  console.log(`sending request ${requestConfig.url}`);
-
   const instance = axios.create({
     baseURL: requestConfig.url,
     timeout: 1000,
-    headers: { 'Authorization': 'Bearer ' + process.env.BEARER_TOKEN }
+    headers: { 'Authorization': 'Bearer ' + requestConfig.auth.bearer }
   });
 
   instance.get(requestConfig.url)
     .then(function (response) {
-      console.log(response.data);
+      //console.debug(response.data);
 
-      req.tweets = response.data
-      res.render('tweeter', {rows : response.data})
+      req.data = response.data
+
+      //res.render('tweeter', {rows : response.data})
+
+      next()
     })
     .catch(function (error) {
       console.log(error);
@@ -52,16 +52,6 @@ const getTweets = async (req, res) => {
   })
   */
 };
-
-
-const jsonTweets = async () => {
-  console.log('getting tweets..')
-
-  await delay(2000); // Delay 2s
-
-  return localTweets;
-};
-
 module.exports = {
   getTweets
 }

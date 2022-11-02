@@ -21,7 +21,10 @@ const sleep = async (delay) => {
 
 const initiateStream = async (req, res, next) => {
     console.log('------ initiating stream -------')
-    res.render('tweeter', { rows: req.data})
+    res.render('tweeter', {
+        rows: req.data,
+        handle: req.userInfo.username
+    })
 
     const response = streamTweets(req.app.get('io'), res);
 }
