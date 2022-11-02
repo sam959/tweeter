@@ -51,6 +51,12 @@ Follow [this guide](https://developer.twitter.com/en/docs/twitter-api/getting-st
    BEARER_TOKEN = 'ENTER YOUR API KEY'
    ```
    and then press CTRL+D when you're finished.
+
+   You can specify the port where to expose your app adding
+   ```
+   PORT = 6060
+   ```
+   to your `.env`. If you do not specify a port, it defaults to 8080.
   
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -63,7 +69,7 @@ Run in dev mode:
    ```js
    npm run dev
    ```
-Go to the hompage at [localhost:6060](http://localhost:6060/) and write in the text box the handle of the Twitter account you want to track.
+Go to the hompage at [localhost:6060](http://localhost:6060/) (or whatever port you specified in your `.env` file) and write in the text box the handle of the Twitter account you want to track.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
