@@ -2,10 +2,11 @@ extends layout
 
 block content
   h1 List of tweets
-  p Viewing #{rows.data.length} tweets of #{handle}
+  h3 Viewing #{rows.data.length} tweets of #{handle}
 
   each item in rows.data
-    li= item.text 
+    li= item.text
+  h2 Any new published tweets will be seen here:
   ul#streamed
 
 

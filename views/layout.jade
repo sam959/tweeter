@@ -3,6 +3,9 @@ html
   head
     script(src='/socket.io/socket.io.js')
     title= title
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet")
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     block content
@@ -11,16 +14,6 @@ script.
   const socket = io();
 
   const streamed = [];
-
-  socket.emit('client', 'Hello from client');
-
-  socket.on('connect', () => {
-    console.log('Client connected to server'); // world
-  });
-  socket.on("hello", (arg) => {
-    console.log(arg); // world
-  });
-  console.log('testing: '+ streamed);
 
   socket.on("tweet", (arg) => {
     console.log('new tweet: '+ arg);
