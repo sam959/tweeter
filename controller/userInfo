@@ -21,9 +21,6 @@ const getUserInfo = (req, res, next) => {
         }
     };
 
-
-    console.log(`sending request to get user info: ${requestConfig.url}`);
-
     const instance = axios.create({
         baseURL: requestConfig.url,
         timeout: 1000,
@@ -32,12 +29,11 @@ const getUserInfo = (req, res, next) => {
 
     instance.get(requestConfig.url)
         .then(function (response) {
-            console.log(response.data);
+            console.log('sending to next response: ' + JSON.stringify(response.data));
 
             //res.send(response);
             req.userInfo = response.data.data
             next()
-
         })
         .catch(function (error) {
             console.log(error);

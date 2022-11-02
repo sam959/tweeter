@@ -6,8 +6,14 @@
 
 var app = require('../app');
 var debug = require('debug')('tweeter:server');
-var http = require('http');
+var streamTweets = require('../controller/test')
+/**
+ * Create HTTP server.
+ */
+var server = require('http').createServer(app);
 require('dotenv').config()
+const io =  require('socket.io')(server);
+
 const { log } = require('console');
 
 /**
@@ -17,11 +23,29 @@ const { log } = require('console');
 var port = normalizePort(process.env.PORT || '7070');
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
+app.set('io', io);
 
-var server = http.createServer(app);
+//Whenever someone connects this gets executed
+
+io.on('connection', async (socket)  => {
+  log('A user connected');
+  streamTweets(io);
+  socket.emit('hello', {message: 'Hello from server!'})
+  //socket.emit("hello", "world");
+
+  socket.on('disconnect', (reason) => {
+     console.log('A user disconnected: ' + reason);
+  });
+  socket.on('client', (msg) => {
+    log("Client: " + msg);
+  })
+  socket.on('server', (msg) => {
+    log("Server: " + msg);
+  })
+  socket.on('tweet', (msg) => {
+    log("Tweet: " + msg);
+  })
+});
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -1,7 +1,25 @@
 doctype html
 html
   head
+    script(src='/socket.io/socket.io.js')
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     block content
+
+script.
+  const socket = io();
+
+  socket.emit('client', 'Hello from client');
+
+  socket.on('connect', () => {
+    console.log('Client connected to server'); // world
+  });
+  socket.on("hello", (arg) => {
+    console.log(arg); // world
+  });
+
+
+  socket.on("tweet", (arg) => {
+    console.log(arg); // world
+  });

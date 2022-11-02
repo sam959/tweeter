@@ -1,0 +1,13 @@
+const localTweets = require('./myTweets.json');
+
+const getLocalTweets = ((req, res, next) => {
+
+    console.log('rendering local tweets')
+    req.data = localTweets
+    res.render('tweeter', {rows : localTweets})
+
+})
+
+module.exports = {
+    getLocalTweets
+}

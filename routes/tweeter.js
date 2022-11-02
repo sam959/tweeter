@@ -9,6 +9,17 @@ const  {
   getUserInfo
 } = require('../controller/userInfo')
 
+const  { 
+  getLocalTweets
+} = require('../controller/mockedTweets')
+
+const  { 
+  setRules
+} = require('../controller/rules')
+
+const  { 
+  streamTweets
+} = require('../controller/streamTweets')
 
 /*
 router.get('/', function(req, res, next) {
@@ -22,7 +33,8 @@ router.get('/', function(req, res, next) {
 */
 
 
-router.get('/', getUserInfo, getTweets);
+router.get('/', getUserInfo,getLocalTweets);
+//router.get('/', getUserInfo, getLocalTweets, getTweets);
 
 
 function localTweets(handle){

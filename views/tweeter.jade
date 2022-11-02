@@ -1,5 +1,9 @@
 extends layout
 
 block content
-  h1= title
-  p Viewing tweets of #{handle}
+  h1 List of tweets
+  p Viewing #{rows.data.length} tweets of #{handle}
+
+
+  each item in rows.data
+    li= item.text
