@@ -10,6 +10,8 @@ html
 script.
   const socket = io();
 
+  const streamed = [];
+
   socket.emit('client', 'Hello from client');
 
   socket.on('connect', () => {
@@ -18,8 +20,18 @@ script.
   socket.on("hello", (arg) => {
     console.log(arg); // world
   });
-
+  console.log('testing: '+ streamed);
 
   socket.on("tweet", (arg) => {
-    console.log(arg); // world
+    console.log('new tweet: '+ arg);
+
+    streamed.pop()
+    streamed.push(arg)
+    console.log(streamed)
+    
+    for (let i of streamed){ 
+      let li = document.createElement("li");     
+      li.innerHTML = i;
+      document.getElementById("streamed").appendChild(li);
+    }
   });

@@ -1,0 +1,103 @@
+const axios = require('axios');
+const needle = require('needle');
+const JSONStream = require('JSONStream');
+const util = require('util');
+
+
+const streamTweets = (req, res, next) => {
+    const username = req.query.handle;
+    const baseUrl = `https://api.twitter.com/2/tweets/search/stream`;
+    console.log(`streaming tweets of ${username}`);
+
+    if (!process.env.BEARER_TOKEN) {
+        res.status(400).send("Error while authenticating call");
+    }
+
+    const token = process.env.BEARER_TOKEN;
+
+    console.log(`sending request to stream tweets`);
+
+    const requestConfig = {
+        url: baseUrl,
+        auth: {
+            bearer: token,
+        }
+    };
+
+    const instance = axios.create({
+        baseURL: requestConfig.url,
+        timeout: 10000,
+        responseType: 'stream',
+        headers: {
+            'Authorization': 'Bearer ' + requestConfig.auth.bearer,
+            'Content-type': 'application/json'
+        }
+    });
+
+    const io = req.app.get('io');
+
+    io.on('connection', async (socket) => {
+
+
+        const stream = needle.get(requestConfig.url, {
+            parse: true,
+            headers: {
+                'Authorization': 'Bearer ' + requestConfig.auth.bearer,
+                'Content-type': 'application/json'
+            }
+        });
+
+        console.log('response...');
+        stream.pipe(JSONStream.parse('data'))
+            .on('readable', function () {
+                var chunk;
+                while (chunk = this.read()) {
+                    console.log('got data: ', chunk);
+                }
+            });
+        stream.on('data', data => {
+            try {
+                const json = JSON.stringify(data)
+                console.log('streaming response...');
+                try {
+
+                    const tweets = JSON.parse(data.toString('utf8')).data.text;
+                    console.log('PARSED: getting tweets: ' + tweets);
+                    io.emit('hello', { message: 'json getting tweets' + JSON.parse(data.toString('utf8')).data.text});
+
+                    res.render('tweeter', {rows : [{data: tweets}]})
+                } catch (error) {
+                    
+                }
+
+            } catch (error) {
+                console.error('error streaming response...');
+                console.error(error)
+                res.send(error)
+            }
+        })
+
+        stream.on('done', () => {
+            console.log('streaming finished');
+            res.send("end")
+        })
+
+        stream.on('error', function (err) {
+            console.error('[ERROR STREAMING]', err);
+            res.send(err)
+        });
+
+    })
+};
+
+
+const reconnect = async (stream, socket) => {
+    timeout++;
+    stream.abort();
+    await sleep(2 ** timeout * 1000);
+    streamTweets(socket);
+  };
+
+module.exports = {
+    streamTweets
+}

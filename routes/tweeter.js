@@ -14,13 +14,16 @@ const  {
 } = require('../controller/mockedTweets')
 
 const  { 
-  setRules
+  setRules, getRules
 } = require('../controller/rules')
 
 const  { 
   streamTweets
-} = require('../controller/streamTweets')
+} = require('../controller/needleStream')
 
+const {
+  initiateStream
+} = require('../controller/streamTweets')
 /*
 router.get('/', function(req, res, next) {
   const handle = req.query.handle;
@@ -32,8 +35,7 @@ router.get('/', function(req, res, next) {
 });
 */
 
-
-router.get('/', getUserInfo,getLocalTweets);
+router.get('/', getRules,getUserInfo, getLocalTweets, initiateStream);
 //router.get('/', getUserInfo, getLocalTweets, getTweets);
 
 
